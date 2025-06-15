@@ -1,8 +1,13 @@
 ---
 import "../styles/global.css";
 import MainLayout from "../layouts/main";
+import YoutubeLayout from "../layouts/ytmain";
 ---
 
-<div id="container">
+<div
+  id="container"
+  class="flex flex-col h-full w-screen justify-start bg-base-200"
+>
   <MainLayout client:load />
+  <YoutubeLayout client:load />
 </div>

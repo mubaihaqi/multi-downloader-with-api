@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function MainLayout() {
+export default function YoutubeLayout() {
   const [videoUrl, setVideoUrl] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -10,7 +10,7 @@ export default function MainLayout() {
     setResult(null);
     setLoading(true);
     try {
-      const apiUrl = `https://fbdown.vercel.app/api/get?url=${encodeURIComponent(
+      const apiUrl = `https://yt-downloader-api.example.com/api/get?url=${encodeURIComponent(
         videoUrl
       )}`;
       const res = await fetch(apiUrl, {
@@ -28,19 +28,19 @@ export default function MainLayout() {
     <div className="h-auto flex flex-col items-center justify-start p-4 pt-8">
       <div className="card w-full max-w-lg bg-base-100 shadow-xl">
         <div className="card-body">
-          <h2 className="card-title text-3xl font-bold text-info justify-center mb-6">
-            Fb Downloader
+          <h2 className="card-title text-3xl font-bold text-error justify-center mb-6">
+            Youtube Downloader
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <input
                 type="text"
-                className={`input input-bordered w-full outline-0 input-ghost focus:input-info ${
+                className={`input input-bordered w-full outline-0 input-ghost focus:input-error ${
                   videoUrl && videoUrl.trim() !== ""
-                    ? "border-info"
+                    ? "border-error"
                     : "border-primary"
                 }`}
-                placeholder="Tempel tautan video Facebook di sini..."
+                placeholder="Tempel tautan video YouTube di sini..."
                 value={videoUrl}
                 onChange={(e) => setVideoUrl(e.target.value)}
                 required
@@ -48,7 +48,7 @@ export default function MainLayout() {
             </div>
             <button
               type="submit"
-              className={`btn btn-info w-full ${loading ? "loading" : ""}`}
+              className={`btn btn-error w-full ${loading ? "loading" : ""}`}
               disabled={loading}
             >
               {loading ? "Memuat..." : "Download"}
@@ -78,27 +78,27 @@ export default function MainLayout() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {result.hd && (
+                  {result.audio && (
                     <a
-                      href={result.hd}
-                      className="btn btn-outline btn-info w-full"
+                      href={result.audio}
+                      className="btn btn-outline btn-error w-full"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Unduh HD
+                      Unduh Audio
                     </a>
                   )}
-                  {result.sd && (
+                  {result.video && (
                     <a
-                      href={result.sd}
-                      className="btn btn-outline btn-info w-full"
+                      href={result.video}
+                      className="btn btn-outline btn-error w-full"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Unduh SD
+                      Unduh Video
                     </a>
                   )}
-                  {!result.hd && !result.sd && (
+                  {!result.audio && !result.video && (
                     <div role="alert" className="alert alert-warning">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
