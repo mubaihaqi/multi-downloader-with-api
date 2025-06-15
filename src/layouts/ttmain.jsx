@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-export default function YoutubeLayout() {
+export default function TiktokLayout() {
   const [videoUrl, setVideoUrl] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -10,7 +10,7 @@ export default function YoutubeLayout() {
     setResult(null);
     setLoading(true);
     try {
-      const apiUrl = `https://yt-downloader-api.example.com/api/get?url=${encodeURIComponent(
+      const apiUrl = `https://tiktok-downloader-api.example.com/api/get?url=${encodeURIComponent(
         videoUrl
       )}`;
       const res = await fetch(apiUrl, {
@@ -28,19 +28,19 @@ export default function YoutubeLayout() {
     <div className="h-auto flex flex-col items-center justify-start p-4 pt-2 lg:pt-8">
       <div className="card w-full max-w-lg bg-base-100 shadow-xl">
         <div className="card-body">
-          <h2 className="card-title text-3xl font-bold text-error justify-center mb-6">
-            Youtube Downloader
+          <h2 className="card-title text-3xl font-bold text-neutral justify-center mb-6">
+            TikTok Downloader
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <input
                 type="text"
-                className={`input input-bordered w-full outline-0 input-ghost focus:input-error ${
+                className={`input input-bordered w-full outline-0 input-ghost focus:input-neutral ${
                   videoUrl && videoUrl.trim() !== ""
-                    ? "border-error"
+                    ? "border-neutral"
                     : "border-primary"
                 }`}
-                placeholder="Tempel tautan video YouTube di sini..."
+                placeholder="Tempel tautan video TikTok di sini..."
                 value={videoUrl}
                 onChange={(e) => setVideoUrl(e.target.value)}
                 required
@@ -48,7 +48,7 @@ export default function YoutubeLayout() {
             </div>
             <button
               type="submit"
-              className={`btn btn-error w-full ${loading ? "loading" : ""}`}
+              className={`btn btn-neutral w-full ${loading ? "loading" : ""}`}
               disabled={loading}
             >
               {loading ? "Memuat..." : "Download"}
@@ -78,27 +78,17 @@ export default function YoutubeLayout() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {result.audio && (
-                    <a
-                      href={result.audio}
-                      className="btn btn-outline btn-error w-full"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Unduh Audio
-                    </a>
-                  )}
                   {result.video && (
                     <a
                       href={result.video}
-                      className="btn btn-outline btn-error w-full"
+                      className="btn btn-outline btn-neutral w-full"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
                       Unduh Video
                     </a>
                   )}
-                  {!result.audio && !result.video && (
+                  {!result.video && (
                     <div role="alert" className="alert alert-warning">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"

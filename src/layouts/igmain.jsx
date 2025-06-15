@@ -25,7 +25,7 @@ export default function InstagramLayout() {
   };
 
   return (
-    <div className="h-auto flex flex-col items-center justify-start p-4 pt-8">
+    <div className="h-auto flex flex-col items-center justify-start p-4 pt-2 lg:pt-8">
       <div className="card w-full max-w-lg bg-base-100 shadow-xl">
         <div className="card-body">
           <h2 className="card-title text-3xl font-bold text-accent justify-center mb-6">
