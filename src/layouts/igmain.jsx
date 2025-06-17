@@ -2,26 +2,70 @@ import React, { useState } from "react";
 
 export default function InstagramLayout() {
   const [videoUrl, setVideoUrl] = useState("");
-  const [result, setResult] = useState(null);
+  const [apiResponse, setApiResponse] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [captionCopied, setCaptionCopied] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setResult(null);
+    setApiResponse(null);
+    setErrorMessage("");
     setLoading(true);
+
     try {
-      const apiUrl = `https://ig-downloader-api.example.com/api/get?url=${encodeURIComponent(
-        videoUrl
-      )}`;
-      const res = await fetch(apiUrl, {
-        method: "GET",
-      });
-      const data = await res.json();
-      setResult(data);
+      const response = await fetch(
+        "https://instagram-downloader-api-nine.vercel.app/download",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ url: videoUrl }),
+        }
+      );
+
+      const data = await response.json();
+      if (response.ok) {
+        if (data && data.download_url) {
+          setCaptionCopied(false);
+          setApiResponse(data);
+        } else {
+          setErrorMessage(
+            data.message || "Media tidak ditemukan atau format tidak didukung."
+          );
+        }
+      } else {
+        setErrorMessage(data.message || "Gagal memproses permintaan.");
+      }
     } catch (err) {
-      setResult({ error: "Gagal mengambil data." });
+      setErrorMessage("Gagal mengambil data. Periksa koneksi Anda.");
     }
     setLoading(false);
+  };
+
+  const handleCopyCaption = async () => {
+    console.log("Mencoba menyalin caption...");
+    console.log("navigator.clipboard:", navigator.clipboard);
+
+    if (
+      navigator.clipboard &&
+      typeof navigator.clipboard.writeText === "function" &&
+      apiResponse &&
+      apiResponse.caption
+    ) {
+      try {
+        await navigator.clipboard.writeText(apiResponse.caption);
+        setCaptionCopied(true);
+        setTimeout(() => setCaptionCopied(false), 2000);
+      } catch (err) {
+        console.error("Gagal menyalin caption: ", err);
+      }
+    } else {
+      console.warn(
+        "Tidak dapat menyalin: Clipboard API tidak didukung atau caption kosong."
+      );
+    }
   };
 
   return (
@@ -54,73 +98,84 @@ export default function InstagramLayout() {
               {loading ? "Memuat..." : "Download"}
             </button>
           </form>
-          {result && (
+
+          {errorMessage && (
             <div className="mt-6">
-              {result.error ? (
-                <div
-                  role="alert"
-                  className="alert alert-error rounded-full py-[9px] flex items-center justify-center"
+              <div
+                role="alert"
+                className="alert alert-error rounded-full py-[9px] flex items-center justify-center"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="stroke-current shrink-0 h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="stroke-current shrink-0 h-6 w-6"
-                    fill="none"
-                    viewBox="0 0 24 24"
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span>{errorMessage}</span>
+              </div>
+            </div>
+          )}
+
+          {!errorMessage && apiResponse && apiResponse.download_url && (
+            <div className="mt-6">
+              <div className="space-y-3">
+                {apiResponse.type === "video" && (
+                  <a
+                    href={apiResponse.download_url}
+                    className="btn btn-outline btn-accent w-full"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                    />
-                  </svg>
-                  <span>{result.error}</span>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {result.video && (
+                    Unduh Video
+                  </a>
+                )}
+                {apiResponse.type === "image" && (
+                  <a
+                    href={apiResponse.download_url}
+                    className="btn btn-outline btn-accent w-full"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download
+                  >
+                    Unduh Gambar
+                  </a>
+                )}
+                {apiResponse.type !== "video" &&
+                  apiResponse.type !== "image" &&
+                  apiResponse.download_url && (
                     <a
-                      href={result.video}
+                      href={apiResponse.download_url}
                       className="btn btn-outline btn-accent w-full"
                       target="_blank"
                       rel="noopener noreferrer"
+                      download
                     >
-                      Unduh Video
+                      Unduh Media
                     </a>
                   )}
-                  {result.image && (
-                    <a
-                      href={result.image}
-                      className="btn btn-outline btn-accent w-full"
-                      target="_blank"
-                      rel="noopener noreferrer"
+
+                {apiResponse.caption && (
+                  <div className="mt-4 p-4 border border-base-300 rounded-md bg-base-200 text-left">
+                    <p className="text-sm text-base-content whitespace-pre-wrap mb-2">
+                      {apiResponse.caption}
+                    </p>
+                    <button
+                      onClick={handleCopyCaption}
+                      className="btn btn-sm btn-outline btn-accent w-full mt-2 py-4"
                     >
-                      Unduh Gambar
-                    </a>
-                  )}
-                  {!result.video && !result.image && (
-                    <div role="alert" className="alert alert-warning">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="stroke-current shrink-0 h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                        />
-                      </svg>
-                      <span>
-                        Media tidak ditemukan atau tidak ada kualitas yang
-                        tersedia.
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
+                      {captionCopied ? "Caption Disalin!" : "Salin Caption"}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>

@@ -2,10 +2,7 @@ import React from "react";
 
 export default function Navbar() {
   return (
-    <div
-      className="navbar bg-base-100 shadow-md rounded-b-xl px-4 py-2 mb-2"
-      data-theme="cupcake"
-    >
+    <div className="navbar fixed z-20 bg-base-100 shadow-md rounded-b-xl px-4 py-2 mb-2">
       <div className="flex-1">
         <span className="text-2xl font-extrabold text-info tracking-wide">
           Multi <span className="text-neutral">Downloader</span>
