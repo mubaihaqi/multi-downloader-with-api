@@ -124,7 +124,21 @@ export default function InstagramLayout() {
           )}
 
           {!errorMessage && apiResponse && apiResponse.download_url && (
-            <div className="mt-6">
+            <div className="mt-2">
+              {apiResponse.caption && (
+                <div className="mt-1 mb-4 p-3 border border-base-300 rounded-md bg-base-200/50 text-left">
+                  <p className="text-sm text-base-content whitespace-pre-wrap mb-2 max-h-24 overflow-y-auto">
+                    {apiResponse.caption}
+                  </p>
+                  <button
+                    onClick={handleCopyCaption}
+                    className="btn btn-xs btn-outline btn-accent w-full mt-2"
+                  >
+                    {captionCopied ? "Caption Disalin!" : "Salin Caption"}
+                  </button>
+                </div>
+              )}
+
               <div className="space-y-3">
                 {apiResponse.type === "video" && (
                   <a
@@ -161,20 +175,6 @@ export default function InstagramLayout() {
                       Unduh Media
                     </a>
                   )}
-
-                {apiResponse.caption && (
-                  <div className="mt-4 p-4 border border-base-300 rounded-md bg-base-200 text-left">
-                    <p className="text-sm text-base-content whitespace-pre-wrap mb-2">
-                      {apiResponse.caption}
-                    </p>
-                    <button
-                      onClick={handleCopyCaption}
-                      className="btn btn-sm btn-outline btn-accent w-full mt-2 py-4"
-                    >
-                      {captionCopied ? "Caption Disalin!" : "Salin Caption"}
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           )}

@@ -130,92 +130,111 @@ export default function TiktokLayout() {
                   <span>{result.error}</span>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {links?.play && (
-                    <a
-                      href={links.play}
-                      className="btn btn-outline btn-neutral w-full"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Unduh Tanpa Watermark
-                    </a>
-                  )}
-                  {links?.wmplay && (
-                    <a
-                      href={links.wmplay}
-                      className="btn btn-outline btn-neutral w-full"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Unduh Dengan Watermark
-                    </a>
-                  )}
-                  {links?.hdplay && (
-                    <a
-                      href={links.hdplay}
-                      className="btn btn-outline btn-neutral w-full"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Unduh Kualitas HD
-                    </a>
-                  )}
-                  {links?.music && (
-                    <a
-                      href={links.music}
-                      className="btn btn-outline btn-neutral w-full"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Unduh Audio / Music
-                    </a>
-                  )}
-
-                  {result.data &&
-                    result.data.data &&
-                    result.data.data.title && (
-                      <div className="mt-4 p-4 border border-base-300 rounded-md bg-base-200 text-left">
-                        <p className="text-sm text-base-content whitespace-pre-wrap mb-2">
-                          {result.data.data.title}
+                <>
+                  {result.data?.data?.cover && result.data?.data?.title && (
+                    <div className="mb-4 text-center">
+                      <img
+                        src={result.data.data.cover}
+                        alt={result.data.data.title}
+                        className="w-48 max-h-64 object-contain rounded-lg mx-auto shadow-lg mb-2"
+                      />
+                      <h3 className="text-lg font-semibold">
+                        {result.data.data.title.length > 70
+                          ? result.data.data.title.substring(0, 70) + "..."
+                          : result.data.data.title}
+                      </h3>
+                      {result.data.data.author?.nickname && (
+                        <p className="text-sm text-base-content/70">
+                          @{result.data.data.author.nickname}
                         </p>
-                        <button
-                          onClick={handleCopyCaption}
-                          className="btn btn-sm btn-outline btn-neutral w-full mt-2 py-4"
-                        >
-                          {captionCopied ? "Caption Disalin!" : "Salin Caption"}
-                        </button>
-                        {copyError && (
-                          <p className="text-error text-xs mt-2 text-center">
-                            {copyError}
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  {!links && (
-                    <div
-                      role="alert"
-                      className="alert alert-warning rounded-full py-[9px] flex items-center justify-center"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="stroke-current shrink-0 h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                        />
-                      </svg>
-                      <span>
-                        Media tidak ditemukan atau format tidak didukung.
-                      </span>
+                      )}
                     </div>
                   )}
-                </div>
+                  {/* Pindahkan blok caption ke sini */}
+                  {result.data?.data?.title && (
+                    <div className="mt-1 mb-4 p-3 border border-base-300 rounded-md bg-base-200/50 text-left">
+                      <p className="text-sm text-base-content whitespace-pre-wrap mb-2 max-h-24 overflow-y-auto">
+                        {result.data.data.title}
+                      </p>
+                      <button
+                        onClick={handleCopyCaption}
+                        className="btn btn-xs btn-outline btn-neutral w-full mt-2"
+                      >
+                        {captionCopied ? "Caption Disalin!" : "Salin Caption"}
+                      </button>
+                      {copyError && (
+                        <p className="text-error text-xs mt-1 text-center">
+                          {copyError}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  <div className="space-y-3">
+                    {links?.play && (
+                      <a
+                        href={links.play}
+                        className="btn btn-outline btn-neutral w-full"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Unduh Tanpa Watermark
+                      </a>
+                    )}
+                    {links?.wmplay && (
+                      <a
+                        href={links.wmplay}
+                        className="btn btn-outline btn-neutral w-full"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Unduh Dengan Watermark
+                      </a>
+                    )}
+                    {links?.hdplay && (
+                      <a
+                        href={links.hdplay}
+                        className="btn btn-outline btn-neutral w-full"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Unduh Kualitas HD
+                      </a>
+                    )}
+                    {links?.music && (
+                      <a
+                        href={links.music}
+                        className="btn btn-outline btn-neutral w-full"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Unduh Audio / Music
+                      </a>
+                    )}
+                    {!links && (
+                      <div
+                        role="alert"
+                        className="alert alert-warning rounded-full py-[9px] flex items-center justify-center"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="stroke-current shrink-0 h-6 w-6"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                          />
+                        </svg>
+                        <span>
+                          Media tidak ditemukan atau format tidak didukung.
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </>
               )}
             </div>
           )}
