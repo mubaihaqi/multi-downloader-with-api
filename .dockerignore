@@ -1,0 +1,25 @@
+# Dependensi Node.js
+node_modules
+
+# Log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# File environment
+.env*
+
+# Output build (dibangun di dalam container)
+dist
+
+# Docker-specific files
+Dockerfile
+.dockerignore
+
+# Git
+.git
+.gitignore
+
+# OS generated files
+.DS_Store
+Thumbs.db
