@@ -72,7 +72,7 @@ export default function InstagramLayout() {
     <div className="h-auto flex flex-col items-center justify-start p-4 pt-2 lg:pt-8">
       <div className="card w-full max-w-lg bg-base-100 shadow-xl">
         <div className="card-body">
-          <h2 className="card-title text-3xl font-bold text-accent justify-center mb-6">
+          <h2 className="card-title text-3xl font-bold text-accent justify-center mb-6 text-center">
             Instagram Downloader
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -82,7 +82,7 @@ export default function InstagramLayout() {
                 className={`input input-bordered w-full outline-0 input-ghost focus:input-accent ${
                   videoUrl && videoUrl.trim() !== ""
                     ? "border-accent"
-                    : "border-primary"
+                    : "border-base-300"
                 }`}
                 placeholder="Tempel tautan video Instagram di sini..."
                 value={videoUrl}

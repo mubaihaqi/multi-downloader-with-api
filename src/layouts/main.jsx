@@ -38,7 +38,7 @@ export default function MainLayout() {
                 className={`input input-bordered w-full outline-0 input-ghost focus:input-info ${
                   videoUrl && videoUrl.trim() !== ""
                     ? "border-info"
-                    : "border-primary"
+                    : "border-base-300"
                 }`}
                 placeholder="Tempel tautan video Facebook di sini..."
                 value={videoUrl}

@@ -17,6 +17,7 @@
     "daisyui": "^5.0.43",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-simple-typewriter": "^5.0.1",
     "sweetalert2": "^11.22.0",
     "tailwindcss": "^4.1.10"
   }

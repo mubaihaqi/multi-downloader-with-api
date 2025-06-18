@@ -38,7 +38,7 @@ export default function TiktokLayout() {
                 className={`input input-bordered w-full outline-0 input-ghost focus:input-neutral ${
                   videoUrl && videoUrl.trim() !== ""
                     ? "border-neutral"
-                    : "border-primary"
+                    : "border-base-300"
                 }`}
                 placeholder="Tempel tautan video TikTok di sini..."
                 value={videoUrl}

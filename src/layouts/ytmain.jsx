@@ -38,7 +38,7 @@ export default function YoutubeLayout() {
                 className={`input input-bordered w-full outline-0 input-ghost focus:input-error ${
                   videoUrl && videoUrl.trim() !== ""
                     ? "border-error"
-                    : "border-primary"
+                    : "border-base-300"
                 }`}
                 placeholder="Tempel tautan video YouTube di sini..."
                 value={videoUrl}
