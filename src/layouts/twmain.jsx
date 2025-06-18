@@ -104,7 +104,6 @@ export default function TwitterLayout() {
                   ))}
                 </div>
               ) : (
-                // Fallback jika tidak ada error tapi juga tidak ada media yang valid
                 <div className="alert alert-primary rounded-full py-[9px] flex items-center justify-center">
                   <span>
                     Tidak ada media yang ditemukan untuk URL ini atau format
