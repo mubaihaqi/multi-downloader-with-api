@@ -19,7 +19,7 @@ export default function MainLayout() {
       const data = await res.json();
       setResult(data);
     } catch (err) {
-      setResult({ error: "Gagal mengambil data." });
+      setResult({ error: "Media tidak ditemukan atau format tidak didukung." });
     }
     setLoading(false);
   };
@@ -59,7 +59,7 @@ export default function MainLayout() {
               {result.error ? (
                 <div
                   role="alert"
-                  className="alert alert-error rounded-full py-[9px] flex items-center justify-center"
+                  className="alert alert-warning rounded-full py-[9px] flex items-center justify-center"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -71,7 +71,7 @@ export default function MainLayout() {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                       strokeWidth="2"
-                      d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
                     />
                   </svg>
                   <span>{result.error}</span>

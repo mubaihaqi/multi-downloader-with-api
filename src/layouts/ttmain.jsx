@@ -4,13 +4,19 @@ export default function TiktokLayout() {
   const [videoUrl, setVideoUrl] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [links, setLinks] = useState(null);
+  const [captionCopied, setCaptionCopied] = useState(false);
+  const [copyError, setCopyError] = useState("");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setResult(null);
+    setLinks(null);
     setLoading(true);
     try {
-      const apiUrl = `https://tiktok-downloader-api.example.com/api/get?url=${encodeURIComponent(
+      setCopyError("");
+      setCaptionCopied(false);
+      const apiUrl = `https://api.ryzumi.vip/api/downloader/ttdl?url=${encodeURIComponent(
         videoUrl
       )}`;
       const res = await fetch(apiUrl, {
@@ -18,12 +24,58 @@ export default function TiktokLayout() {
       });
       const data = await res.json();
       setResult(data);
+
+      if (data.success && data.data?.data) {
+        setLinks({
+          play: data.data.data.play,
+          wmplay: data.data.data.wmplay,
+          hdplay: data.data.data.hdplay,
+          music: data.data.data.music,
+        });
+      } else {
+        setLinks(null);
+      }
     } catch (err) {
       setResult({ error: "Gagal mengambil data." });
+      setLinks(null);
     }
     setLoading(false);
   };
 
+  const handleCopyCaption = async () => {
+    setCopyError("");
+    const captionToCopy = result?.data?.data?.title;
+
+    if (!captionToCopy) {
+      console.warn("Caption kosong, tidak ada yang disalin.");
+      setCopyError("Caption kosong, tidak ada yang bisa disalin.");
+      setTimeout(() => setCopyError(""), 3000);
+      return;
+    }
+
+    if (
+      navigator.clipboard &&
+      typeof navigator.clipboard.writeText === "function"
+    ) {
+      try {
+        await navigator.clipboard.writeText(captionToCopy);
+        setCaptionCopied(true);
+        setTimeout(() => setCaptionCopied(false), 2000);
+      } catch (err) {
+        console.error("Gagal menyalin caption: ", err);
+        setCopyError("Gagal menyalin caption. Coba lagi.");
+        setTimeout(() => setCopyError(""), 3000);
+      }
+    } else {
+      console.warn(
+        "Fitur salin tidak didukung di browser ini atau halaman tidak aman (non-HTTPS)."
+      );
+      setCopyError(
+        "Fitur salin tidak didukung di browser ini / halaman tidak aman."
+      );
+      setTimeout(() => setCopyError(""), 4000);
+    }
+  };
   return (
     <div className="h-auto flex flex-col items-center justify-start p-4 pt-2 lg:pt-8">
       <div className="card w-full max-w-lg bg-base-100 shadow-xl">
@@ -54,6 +106,7 @@ export default function TiktokLayout() {
               {loading ? "Memuat..." : "Download"}
             </button>
           </form>
+
           {result && (
             <div className="mt-6">
               {result.error ? (
@@ -78,18 +131,72 @@ export default function TiktokLayout() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {result.video && (
+                  {links?.play && (
                     <a
-                      href={result.video}
+                      href={links.play}
                       className="btn btn-outline btn-neutral w-full"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Unduh Video
+                      Unduh Tanpa Watermark
                     </a>
                   )}
-                  {!result.video && (
-                    <div role="alert" className="alert alert-warning">
+                  {links?.wmplay && (
+                    <a
+                      href={links.wmplay}
+                      className="btn btn-outline btn-neutral w-full"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Unduh Dengan Watermark
+                    </a>
+                  )}
+                  {links?.hdplay && (
+                    <a
+                      href={links.hdplay}
+                      className="btn btn-outline btn-neutral w-full"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Unduh Kualitas HD
+                    </a>
+                  )}
+                  {links?.music && (
+                    <a
+                      href={links.music}
+                      className="btn btn-outline btn-neutral w-full"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Unduh Audio / Music
+                    </a>
+                  )}
+
+                  {result.data &&
+                    result.data.data &&
+                    result.data.data.title && (
+                      <div className="mt-4 p-4 border border-base-300 rounded-md bg-base-200 text-left">
+                        <p className="text-sm text-base-content whitespace-pre-wrap mb-2">
+                          {result.data.data.title}
+                        </p>
+                        <button
+                          onClick={handleCopyCaption}
+                          className="btn btn-sm btn-outline btn-neutral w-full mt-2 py-4"
+                        >
+                          {captionCopied ? "Caption Disalin!" : "Salin Caption"}
+                        </button>
+                        {copyError && (
+                          <p className="text-error text-xs mt-2 text-center">
+                            {copyError}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  {!links && (
+                    <div
+                      role="alert"
+                      className="alert alert-warning rounded-full py-[9px] flex items-center justify-center"
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="stroke-current shrink-0 h-6 w-6"
@@ -104,8 +211,7 @@ export default function TiktokLayout() {
                         />
                       </svg>
                       <span>
-                        Video tidak ditemukan atau tidak ada kualitas yang
-                        tersedia.
+                        Media tidak ditemukan atau format tidak didukung.
                       </span>
                     </div>
                   )}
