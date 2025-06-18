@@ -46,7 +46,7 @@ const capitalize = (str) => {
 };
 
 export default function Navbar() {
-  const [activeThemeName, setActiveThemeName] = useState(capitalize("cupcake"));
+  const [activeThemeName, setActiveThemeName] = useState(capitalize("retro"));
 
   useEffect(() => {
     const toastShown = sessionStorage.getItem("themeToastShown");
@@ -59,8 +59,8 @@ export default function Navbar() {
           title:
             "Bosen dengan tema? Bisa ganti, lo! Coba pencet judul web ini.",
           showConfirmButton: false,
-          timer: 4000,
-          background: "rgba(255, 255, 255, 0.1)",
+          timer: 5000,
+          background: "rgba(176, 169, 143, 0.4)",
           color: "#3ABFF8",
           timerProgressBar: true,
           customClass: {
@@ -76,7 +76,7 @@ export default function Navbar() {
     }
 
     const savedThemeFromStorage = localStorage.getItem("selectedTheme");
-    let initialTheme = "cupcake";
+    let initialTheme = "retro";
     if (savedThemeFromStorage) {
       initialTheme = savedThemeFromStorage;
     }
