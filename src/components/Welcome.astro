@@ -5,8 +5,10 @@ import YoutubeLayout from "../layouts/ytmain";
 import InstagramLayout from "../layouts/igmain";
 import TiktokLayout from "../layouts/ttmain";
 import TwitterLayout from "../layouts/twmain";
-import Spotifylayout from "../layouts/spmain";
+import SpotifyLayout from "../layouts/spmain";
 import PinterestLayout from "../layouts/pinmain";
+import ThreadsLayout from "../layouts/thdmain";
+import XiaohongshuLayout from "../layouts/xhzmain";
 import Navbar from "./navbar";
 ---
 
@@ -17,26 +19,30 @@ import Navbar from "./navbar";
   <Navbar client:load />
   <MainLayout client:load />
   <InstagramLayout client:load />
+  <TiktokLayout client:load />
+  <PinterestLayout client:load />
+  <TwitterLayout client:load />
+  <SpotifyLayout client:load />
+  <YoutubeLayout client:load />
+
   <div class="relative w-full h-full mt-8">
     <div
-      class="absolute inset-0 flex items-start mt-24 justify-center z-20 pointer-events-none"
+      class="absolute inset-0 flex items-center justify-center z-20 pointer-events-none"
     >
       <div
-        class="bg-base-100 p-4 rounded-xl shadow-2xl border-2 border-base-content/10 max-w-md w-full mx-4 text-center"
+        class="bg-base-100/90 p-4 py-14 rounded-xl shadow-2xl border-2 border-base-content/10 max-w-md w-full mx-4 text-center"
       >
         <p class="font-semibold text-lg text-base-content">
-          Fitur ini belum tersedia atau masih dalam pengembangan
+          Fitur ini belum tersedia atau masih dalam pengembangan <br />Harap
+          sabar menunggu ya!!...
         </p>
       </div>
     </div>
     <div
-      class="flex flex-col w-full h-full blur-md pointer-events-none relative z-10"
+      class="flex flex-col w-full h-full blur-xs pointer-events-none relative z-10"
     >
-      <TiktokLayout client:load />
-      <PinterestLayout client:load />
-      <TwitterLayout client:load />
-      <Spotifylayout client:load />
-      <YoutubeLayout client:load />
+      <ThreadsLayout client:load />
+      <XiaohongshuLayout client:load />
     </div>
   </div>
 </div>
