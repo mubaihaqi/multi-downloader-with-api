@@ -8,6 +8,10 @@ export default function TiktokLayout() {
   const [captionCopied, setCaptionCopied] = useState(false);
   const [copyError, setCopyError] = useState("");
 
+  const isIOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const MAX_SAFE_BLOB_SIZE = 30 * 1024 * 1024; // 30 MB
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setResult(null);
@@ -19,9 +23,7 @@ export default function TiktokLayout() {
       const apiUrl = `https://api.ryzumi.vip/api/downloader/ttdl?url=${encodeURIComponent(
         videoUrl
       )}`;
-      const res = await fetch(apiUrl, {
-        method: "GET",
-      });
+      const res = await fetch(apiUrl, { method: "GET" });
       const data = await res.json();
       setResult(data);
 
@@ -45,37 +47,57 @@ export default function TiktokLayout() {
   const handleCopyCaption = async () => {
     setCopyError("");
     const captionToCopy = result?.data?.data?.title;
-
     if (!captionToCopy) {
-      console.warn("Caption kosong, tidak ada yang disalin.");
       setCopyError("Caption kosong, tidak ada yang bisa disalin.");
       setTimeout(() => setCopyError(""), 3000);
       return;
     }
 
-    if (
-      navigator.clipboard &&
-      typeof navigator.clipboard.writeText === "function"
-    ) {
+    if (navigator.clipboard?.writeText) {
       try {
         await navigator.clipboard.writeText(captionToCopy);
         setCaptionCopied(true);
         setTimeout(() => setCaptionCopied(false), 2000);
       } catch (err) {
-        console.error("Gagal menyalin caption: ", err);
         setCopyError("Gagal menyalin caption. Coba lagi.");
         setTimeout(() => setCopyError(""), 3000);
       }
     } else {
-      console.warn(
-        "Fitur salin tidak didukung di browser ini atau halaman tidak aman (non-HTTPS)."
-      );
-      setCopyError(
-        "Fitur salin tidak didukung di browser ini / halaman tidak aman."
-      );
+      setCopyError("Fitur salin tidak didukung di browser ini.");
       setTimeout(() => setCopyError(""), 4000);
     }
   };
+
+  const handleSmartDownload = async (url, filename = "video.mp4") => {
+    if (isIOS) {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+
+        if (blob.size > MAX_SAFE_BLOB_SIZE) {
+          console.warn(`File ${blob.size} terlalu besar, fallback open tab`);
+          window.open(url, "_blank");
+          return;
+        }
+
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(blobUrl);
+      } catch (err) {
+        console.error("Gagal Blob, fallback open tab", err);
+        window.open(url, "_blank");
+      }
+    } else {
+      // Android/Desktop: buka tab
+      window.open(url, "_blank");
+    }
+  };
+
   return (
     <div className="h-auto flex flex-col items-center justify-start p-4 pt-2 lg:pt-8">
       <div className="card w-full max-w-lg bg-base-100 shadow-xl">
@@ -84,20 +106,16 @@ export default function TiktokLayout() {
             TikTok Downloader
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <input
-                type="text"
-                className={`input input-bordered w-full outline-0 input-ghost focus:input-neutral ${
-                  videoUrl && videoUrl.trim() !== ""
-                    ? "border-neutral"
-                    : "border-base-300"
-                }`}
-                placeholder="Tempel tautan video TikTok di sini..."
-                value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
-                required
-              />
-            </div>
+            <input
+              type="text"
+              className={`input input-bordered w-full outline-0 input-ghost focus:input-neutral ${
+                videoUrl.trim() ? "border-neutral" : "border-base-300"
+              }`}
+              placeholder="Tempel tautan video TikTok di sini..."
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              required
+            />
             <button
               type="submit"
               className={`btn btn-neutral w-full ${loading ? "loading" : ""}`}
@@ -131,7 +149,7 @@ export default function TiktokLayout() {
                 </div>
               ) : (
                 <>
-                  {result.data?.data?.cover && result.data?.data?.title && (
+                  {result.data?.data?.cover && (
                     <div className="mb-4 text-center">
                       <img
                         src={result.data.data.cover}
@@ -140,7 +158,7 @@ export default function TiktokLayout() {
                       />
                       <h3 className="text-lg font-semibold">
                         {result.data.data.title.length > 70
-                          ? result.data.data.title.substring(0, 70) + "..."
+                          ? result.data.data.title.slice(0, 70) + "..."
                           : result.data.data.title}
                       </h3>
                       {result.data.data.author?.nickname && (
@@ -150,7 +168,7 @@ export default function TiktokLayout() {
                       )}
                     </div>
                   )}
-                  {/* Pindahkan blok caption ke sini */}
+
                   {result.data?.data?.title && (
                     <div className="mt-1 mb-4 p-3 border border-base-300 rounded-md bg-base-200/50 text-left">
                       <p className="text-sm text-base-content whitespace-pre-wrap mb-2 max-h-24 overflow-y-auto">
@@ -169,46 +187,47 @@ export default function TiktokLayout() {
                       )}
                     </div>
                   )}
+
                   <div className="space-y-3">
                     {links?.play && (
-                      <a
-                        href={links.play}
+                      <button
                         className="btn btn-outline btn-neutral w-full"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        onClick={() =>
+                          handleSmartDownload(links.play, "tiktok-nowm.mp4")
+                        }
                       >
                         Unduh Tanpa Watermark
-                      </a>
+                      </button>
                     )}
                     {links?.wmplay && (
-                      <a
-                        href={links.wmplay}
+                      <button
                         className="btn btn-outline btn-neutral w-full"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        onClick={() =>
+                          handleSmartDownload(links.wmplay, "tiktok-wm.mp4")
+                        }
                       >
                         Unduh Dengan Watermark
-                      </a>
+                      </button>
                     )}
                     {links?.hdplay && (
-                      <a
-                        href={links.hdplay}
+                      <button
                         className="btn btn-outline btn-neutral w-full"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        onClick={() =>
+                          handleSmartDownload(links.hdplay, "tiktok-hd.mp4")
+                        }
                       >
                         Unduh Kualitas HD
-                      </a>
+                      </button>
                     )}
                     {links?.music && (
-                      <a
-                        href={links.music}
+                      <button
                         className="btn btn-outline btn-neutral w-full"
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        onClick={() =>
+                          handleSmartDownload(links.music, "tiktok-music.mp3")
+                        }
                       >
                         Unduh Audio / Music
-                      </a>
+                      </button>
                     )}
                     {!links && (
                       <div
