@@ -6,6 +6,10 @@ export default function SpotifyLayout() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
 
+  const isIOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const MAX_SAFE_BLOB_SIZE = 30 * 1024 * 1024; // 30 MB
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setResult(null);
@@ -16,9 +20,7 @@ export default function SpotifyLayout() {
       const apiUrl = `https://api.ryzumi.vip/api/downloader/spotify?url=${encodeURIComponent(
         songUrl
       )}`;
-      const res = await fetch(apiUrl, {
-        method: "GET",
-      });
+      const res = await fetch(apiUrl);
       const data = await res.json();
 
       if (data.success && data.link && data.metadata) {
@@ -34,28 +36,59 @@ export default function SpotifyLayout() {
     setLoading(false);
   };
 
+  const handleSmartDownload = async () => {
+    if (!result || !result.link) return;
+
+    const filename = `${result.metadata.artists} - ${result.metadata.title}.mp3`;
+
+    if (isIOS) {
+      try {
+        const response = await fetch(result.link);
+        const blob = await response.blob();
+
+        if (blob.size > MAX_SAFE_BLOB_SIZE) {
+          console.warn(
+            `File terlalu besar (${blob.size} bytes). Fallback open tab.`
+          );
+          window.open(result.link, "_blank");
+          return;
+        }
+
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(blobUrl);
+      } catch (err) {
+        console.error("Gagal Blob download, fallback open tab:", err);
+        window.open(result.link, "_blank");
+      }
+    } else {
+      window.open(result.link, "_blank");
+    }
+  };
+
   return (
     <div className="h-auto flex flex-col items-center justify-start p-4 pt-2 lg:pt-8">
       <div className="card w-full max-w-lg bg-base-100 shadow-xl">
         <div className="card-body">
-          <h2 className="card-title text-3xl font-bold text-success justify-center mb-6">
+          <h2 className="card-title text-3xl font-bold text-success justify-center mb-6 text-center">
             Spotify Downloader
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <input
-                type="text"
-                className={`input input-bordered w-full outline-0 input-ghost focus:input-success ${
-                  songUrl && songUrl.trim() !== ""
-                    ? "border-success"
-                    : "border-base-300"
-                }`}
-                placeholder="Tempel tautan lagu Spotify di sini..."
-                value={songUrl}
-                onChange={(e) => setSongUrl(e.target.value)}
-                required
-              />
-            </div>
+            <input
+              type="text"
+              className={`input input-bordered w-full outline-0 input-ghost focus:input-success ${
+                songUrl.trim() ? "border-success" : "border-base-300"
+              }`}
+              placeholder="Tempel tautan lagu Spotify di sini..."
+              value={songUrl}
+              onChange={(e) => setSongUrl(e.target.value)}
+              required
+            />
             <button
               type="submit"
               className={`btn btn-success w-full ${loading ? "loading" : ""}`}
@@ -91,30 +124,23 @@ export default function SpotifyLayout() {
 
           {!errorMessage && result && result.link && result.metadata && (
             <div className="mt-6 text-center">
-              <div className="mb-4">
-                {result.metadata.cover && (
-                  <img
-                    src={result.metadata.cover}
-                    alt={result.metadata.title}
-                    className="w-32 h-32 object-cover rounded-lg mx-auto shadow-lg"
-                  />
-                )}
-                <h3 className="text-xl font-semibold mt-3">
-                  {result.metadata.title}
-                </h3>
-                <p className="text-sm text-base-content/70">
-                  {result.metadata.artists}
-                </p>
-              </div>
-              <a
-                href={result.link}
-                className="btn btn-outline btn-success w-full"
-                target="_blank"
-                rel="noopener noreferrer"
-                download={`${result.metadata.artists} - ${result.metadata.title}.mp3`}
+              {result.metadata.cover && (
+                <img
+                  src={result.metadata.cover}
+                  alt={result.metadata.title}
+                  className="w-32 h-32 object-cover rounded-lg mx-auto shadow-lg mb-3"
+                />
+              )}
+              <h3 className="text-xl font-semibold">{result.metadata.title}</h3>
+              <p className="text-sm text-base-content/70">
+                {result.metadata.artists}
+              </p>
+              <button
+                onClick={handleSmartDownload}
+                className="btn btn-outline btn-success w-full mt-4"
               >
                 Unduh Lagu
-              </a>
+              </button>
             </div>
           )}
         </div>

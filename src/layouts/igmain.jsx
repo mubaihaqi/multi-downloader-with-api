@@ -7,6 +7,10 @@ export default function InstagramLayout() {
   const [loading, setLoading] = useState(false);
   const [captionCopied, setCaptionCopied] = useState(false);
 
+  const isIOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const MAX_SAFE_BLOB_SIZE = 30 * 1024 * 1024; // 30 MB
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setApiResponse(null);
@@ -45,14 +49,10 @@ export default function InstagramLayout() {
   };
 
   const handleCopyCaption = async () => {
-    console.log("Mencoba menyalin caption...");
-    console.log("navigator.clipboard:", navigator.clipboard);
-
     if (
       navigator.clipboard &&
       typeof navigator.clipboard.writeText === "function" &&
-      apiResponse &&
-      apiResponse.caption
+      apiResponse?.caption
     ) {
       try {
         await navigator.clipboard.writeText(apiResponse.caption);
@@ -62,9 +62,36 @@ export default function InstagramLayout() {
         console.error("Gagal menyalin caption: ", err);
       }
     } else {
-      console.warn(
-        "Tidak dapat menyalin: Clipboard API tidak didukung atau caption kosong."
-      );
+      console.warn("Clipboard API tidak didukung atau caption kosong.");
+    }
+  };
+
+  const handleSmartDownload = async (url, filename = "instagram-media") => {
+    if (isIOS) {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+
+        if (blob.size > MAX_SAFE_BLOB_SIZE) {
+          console.warn(`File ${blob.size} terlalu besar, fallback open tab`);
+          window.open(url, "_blank");
+          return;
+        }
+
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(blobUrl);
+      } catch (err) {
+        console.error("Gagal Blob, fallback open tab", err);
+        window.open(url, "_blank");
+      }
+    } else {
+      window.open(url, "_blank");
     }
   };
 
@@ -76,20 +103,16 @@ export default function InstagramLayout() {
             Instagram Downloader
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <input
-                type="text"
-                className={`input input-bordered w-full outline-0 input-ghost focus:input-accent ${
-                  videoUrl && videoUrl.trim() !== ""
-                    ? "border-accent"
-                    : "border-base-300"
-                }`}
-                placeholder="Tempel tautan video Instagram di sini..."
-                value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
-                required
-              />
-            </div>
+            <input
+              type="text"
+              className={`input input-bordered w-full outline-0 input-ghost focus:input-accent ${
+                videoUrl.trim() ? "border-accent" : "border-base-300"
+              }`}
+              placeholder="Tempel tautan video Instagram di sini..."
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              required
+            />
             <button
               type="submit"
               className={`btn btn-accent w-full ${loading ? "loading" : ""}`}
@@ -140,41 +163,23 @@ export default function InstagramLayout() {
               )}
 
               <div className="space-y-3">
-                {apiResponse.type === "video" && (
-                  <a
-                    href={apiResponse.download_url}
+                {apiResponse.type && (
+                  <button
                     className="btn btn-outline btn-accent w-full"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    download
+                    onClick={() =>
+                      handleSmartDownload(
+                        apiResponse.download_url,
+                        `instagram-${apiResponse.type}`
+                      )
+                    }
                   >
-                    Unduh Video
-                  </a>
+                    {apiResponse.type === "video"
+                      ? "Unduh Video"
+                      : apiResponse.type === "image"
+                      ? "Unduh Gambar"
+                      : "Unduh Media"}
+                  </button>
                 )}
-                {apiResponse.type === "image" && (
-                  <a
-                    href={apiResponse.download_url}
-                    className="btn btn-outline btn-accent w-full"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    download
-                  >
-                    Unduh Gambar
-                  </a>
-                )}
-                {apiResponse.type !== "video" &&
-                  apiResponse.type !== "image" &&
-                  apiResponse.download_url && (
-                    <a
-                      href={apiResponse.download_url}
-                      className="btn btn-outline btn-accent w-full"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      download
-                    >
-                      Unduh Media
-                    </a>
-                  )}
               </div>
             </div>
           )}

@@ -5,6 +5,10 @@ export default function TwitterLayout() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const isIOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const MAX_SAFE_BLOB_SIZE = 30 * 1024 * 1024; // 30 MB
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setResult(null);
@@ -14,10 +18,9 @@ export default function TwitterLayout() {
       const apiUrl = `https://api.ryzumi.vip/api/downloader/twitter?url=${encodeURIComponent(
         videoUrl
       )}`;
-      const res = await fetch(apiUrl, {
-        method: "GET",
-      });
+      const res = await fetch(apiUrl);
       const data = await res.json();
+
       if (data.status && data.media && data.media.length > 0) {
         setResult(data);
       } else {
@@ -27,33 +30,60 @@ export default function TwitterLayout() {
         });
       }
     } catch (err) {
-      setResult({ error: "Media tidak ditemukan atau format tidak didukung." });
+      setResult({
+        error: "Media tidak ditemukan atau format tidak didukung.",
+      });
     }
     setLoading(false);
+  };
+
+  const handleSmartDownload = async (url, filename) => {
+    if (isIOS) {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+
+        if (blob.size > MAX_SAFE_BLOB_SIZE) {
+          console.warn(`File terlalu besar (${blob.size}). Fallback open tab.`);
+          window.open(url, "_blank");
+          return;
+        }
+
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(blobUrl);
+      } catch (err) {
+        console.error("Gagal Blob download, fallback open tab:", err);
+        window.open(url, "_blank");
+      }
+    } else {
+      window.open(url, "_blank");
+    }
   };
 
   return (
     <div className="h-auto flex flex-col items-center justify-start p-4 pt-2 lg:pt-8">
       <div className="card w-full max-w-lg bg-base-100 shadow-xl">
         <div className="card-body">
-          <h2 className="card-title text-3xl font-bold text-primary justify-center mb-6">
+          <h2 className="card-title text-3xl font-bold text-primary justify-center mb-6 text-center">
             Twitter Downloader
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <input
-                type="text"
-                className={`input input-bordered w-full outline-0 input-ghost focus:input-primary ${
-                  videoUrl && videoUrl.trim() !== ""
-                    ? "border-primary"
-                    : "border-base-300"
-                }`}
-                placeholder="Tempel tautan video Twitter di sini..."
-                value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
-                required
-              />
-            </div>
+            <input
+              type="text"
+              className={`input input-bordered w-full outline-0 input-ghost focus:input-primary ${
+                videoUrl.trim() ? "border-primary" : "border-base-300"
+              }`}
+              placeholder="Tempel tautan video Twitter di sini..."
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              required
+            />
             <button
               type="submit"
               className={`btn btn-primary w-full ${loading ? "loading" : ""}`}
@@ -62,6 +92,7 @@ export default function TwitterLayout() {
               {loading ? "Memuat..." : "Download"}
             </button>
           </form>
+
           {result && (
             <div className="mt-6">
               {result.error ? (
@@ -87,24 +118,29 @@ export default function TwitterLayout() {
               ) : result.media && result.media.length > 0 ? (
                 <div className="space-y-3">
                   {result.media.map((item, index) => (
-                    <a
+                    <button
                       key={index}
-                      href={item.url}
+                      onClick={() =>
+                        handleSmartDownload(
+                          item.url,
+                          `twitter_video_${item.quality || index}.mp4`
+                        )
+                      }
                       className="btn btn-outline btn-primary w-full"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      download={`twitter_video_${item.quality || index}.mp4`}
                     >
                       {`Unduh Video Twitter ${
                         item.quality
                           ? `${item.quality}p`
                           : `(Kualitas ${index + 1})`
                       }`}
-                    </a>
+                    </button>
                   ))}
                 </div>
               ) : (
-                <div className="alert alert-primary rounded-full py-[9px] flex items-center justify-center">
+                <div
+                  className="alert alert-warning rounded-full py-[9px] flex items-center justify-center"
+                  role="alert"
+                >
                   <span>
                     Tidak ada media yang ditemukan untuk URL ini atau format
                     tidak didukung.

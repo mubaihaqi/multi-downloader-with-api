@@ -5,6 +5,10 @@ export default function MainLayout() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const isIOS =
+    /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const MAX_SAFE_BLOB_SIZE = 30 * 1024 * 1024; // 30 MB
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setResult(null);
@@ -13,15 +17,43 @@ export default function MainLayout() {
       const apiUrl = `https://fbdown.vercel.app/api/get?url=${encodeURIComponent(
         videoUrl
       )}`;
-      const res = await fetch(apiUrl, {
-        method: "GET",
-      });
+      const res = await fetch(apiUrl, { method: "GET" });
       const data = await res.json();
       setResult(data);
     } catch (err) {
       setResult({ error: "Media tidak ditemukan atau format tidak didukung." });
     }
     setLoading(false);
+  };
+
+  const handleSmartDownload = async (url, filename = "fb-video.mp4") => {
+    if (isIOS) {
+      try {
+        const response = await fetch(url);
+        const blob = await response.blob();
+
+        if (blob.size > MAX_SAFE_BLOB_SIZE) {
+          console.warn(`File ${blob.size} terlalu besar, fallback open tab`);
+          window.open(url, "_blank");
+          return;
+        }
+
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(blobUrl);
+      } catch (err) {
+        console.error("Gagal Blob, fallback open tab", err);
+        window.open(url, "_blank");
+      }
+    } else {
+      // Android/Desktop: buka tab
+      window.open(url, "_blank");
+    }
   };
 
   return (
@@ -32,20 +64,16 @@ export default function MainLayout() {
             Facebook Downloader
           </h2>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <input
-                type="text"
-                className={`input input-bordered w-full outline-0 input-ghost focus:input-info ${
-                  videoUrl && videoUrl.trim() !== ""
-                    ? "border-info"
-                    : "border-base-300"
-                }`}
-                placeholder="Tempel tautan video Facebook di sini..."
-                value={videoUrl}
-                onChange={(e) => setVideoUrl(e.target.value)}
-                required
-              />
-            </div>
+            <input
+              type="text"
+              className={`input input-bordered w-full outline-0 input-ghost focus:input-info ${
+                videoUrl.trim() ? "border-info" : "border-base-300"
+              }`}
+              placeholder="Tempel tautan video Facebook di sini..."
+              value={videoUrl}
+              onChange={(e) => setVideoUrl(e.target.value)}
+              required
+            />
             <button
               type="submit"
               className={`btn btn-info w-full ${loading ? "loading" : ""}`}
@@ -54,6 +82,7 @@ export default function MainLayout() {
               {loading ? "Memuat..." : "Download"}
             </button>
           </form>
+
           {result && (
             <div className="mt-6">
               {result.error ? (
@@ -79,24 +108,24 @@ export default function MainLayout() {
               ) : (
                 <div className="space-y-3">
                   {result.hd && (
-                    <a
-                      href={result.hd}
+                    <button
                       className="btn btn-outline btn-info w-full"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      onClick={() =>
+                        handleSmartDownload(result.hd, "facebook-hd.mp4")
+                      }
                     >
                       Unduh HD
-                    </a>
+                    </button>
                   )}
                   {result.sd && (
-                    <a
-                      href={result.sd}
+                    <button
                       className="btn btn-outline btn-info w-full"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      onClick={() =>
+                        handleSmartDownload(result.sd, "facebook-sd.mp4")
+                      }
                     >
                       Unduh SD
-                    </a>
+                    </button>
                   )}
                   {!result.hd && !result.sd && (
                     <div role="alert" className="alert alert-warning">
