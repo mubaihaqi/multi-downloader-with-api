@@ -1,9 +1,24 @@
+---
+export interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Multi Downloader - Unduh Video dari Berbagai Platform",
+  description = "Unduh video dari Facebook, YouTube, Instagram, TikTok, dan lainnya dengan cepat dan mudah. Gratis, tanpa registrasi.",
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const imageURL = new URL("/icon.png", Astro.site);
+---
+
 <!doctype html>
-<html lang="en">
+<html lang="id">
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content="Astro description" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" href="/icon.png" />
     <meta name="generator" content={Astro.generator} />
     <!-- Google tag (gtag.js) -->
@@ -17,7 +32,28 @@
       gtag("js", new Date());
       gtag("config", "G-0F78S4F88J");
     </script>
-    <title>Multi Downloader</title>
+    <title>{title}</title>
+
+    <!-- SEO Meta Tags -->
+    <link rel="canonical" href={canonicalURL.href} />
+    <meta
+      name="keywords"
+      content="facebook downloader, youtube downloader, instagram downloader, tiktok downloader, video downloader, unduh video, multi video downloader, unduh dari berbagai platform, download video gratis, unduh video cepat, unduh video tanpa registrasi, multi downloader, video downloader gratis, unduh video online, download video online, unduh video dari facebook, unduh video dari youtube, unduh video dari instagram, unduh video dari tiktok, unduh video dari berbagai platform, spotify downloader, pinterest downloader, twitter downloader, threads downloader, xiaohongshu downloader, unduh video dari spotify, unduh video dari pinterest, unduh video dari twitter, unduh video dari threads, unduh video dari xiaohongshu"
+    />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL.href} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={imageURL.href} />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageURL.href} />
   </head>
   <body>
     <slot />

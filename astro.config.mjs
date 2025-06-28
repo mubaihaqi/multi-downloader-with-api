@@ -5,6 +5,7 @@ import react from "@astrojs/react";
 
 // https://astro.build/config
 export default defineConfig({
+  site: "https://multidownloader-orpin.vercel.app",
   vite: {
     plugins: [tailwindcss()],
   },
