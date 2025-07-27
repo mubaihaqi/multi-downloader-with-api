@@ -56,6 +56,14 @@ const imageURL = new URL("/icon.png", Astro.site);
     <meta name="twitter:image" content={imageURL.href} />
   </head>
   <body>
+    <!-- Video Background -->
+    <div class="video-background">
+      <video autoplay muted loop playsinline>
+        <source src="/totoro.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </div>
+
     <slot />
   </body>
 </html>
@@ -66,5 +74,34 @@ const imageURL = new URL("/icon.png", Astro.site);
     margin: 0;
     width: 100%;
     height: 100%;
+  }
+
+  .video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+  }
+
+  .video-background video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.8;
+  }
+
+  /* Overlay untuk memastikan konten tetap terbaca */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: -1;
   }
 </style>

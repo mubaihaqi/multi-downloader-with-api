@@ -53,18 +53,24 @@ export default function Navbar() {
 
     if (!toastShown) {
       setTimeout(() => {
+        // Ambil warna base-100 dari CSS variable DaisyUI
+        const base100 =
+          getComputedStyle(document.documentElement).getPropertyValue("--b1") ||
+          "#424753";
         Swal.fire({
           toast: true,
           position: "top",
-          title:
-            "Bosen dengan tema? Bisa ganti, lo! Coba pencet judul web ini.",
+          title: "🎨 Personalisasi Tema",
+          text: "Klik judul website untuk mengganti tema sesuai mood kamu!",
           showConfirmButton: false,
-          timer: 5000,
-          background: "rgba(176, 169, 143, 0.4)",
+          timer: 6000,
+          background: base100.trim(),
           color: "#3ABFF8",
           timerProgressBar: true,
           customClass: {
-            popup: "glass-toast",
+            popup: "glass-toast border-0 text-info",
+            title: "text-lg font-bold text-info",
+            htmlContainer: "text-sm text-info",
           },
           didOpen: (toast) => {
             toast.onmouseenter = Swal.stopTimer;
@@ -72,7 +78,7 @@ export default function Navbar() {
           },
         });
         sessionStorage.setItem("themeToastShown", "true");
-      }, 0);
+      }, 3000);
     }
 
     const savedThemeFromStorage = localStorage.getItem("selectedTheme");
@@ -99,10 +105,14 @@ export default function Navbar() {
   };
 
   return (
-    <div className="navbar fixed z-20 bg-base-100 shadow-md rounded-b-xl px-4 py-2 mb-2">
+    <div className="navbar fixed z-20 bg-base-100/90 backdrop-blur-md shadow-md rounded-b-xl px-4 py-2 mb-2">
       <div className="flex-1">
         <div className="dropdown">
-          <div tabIndex={0} role="button" className="cursor-pointer">
+          <div
+            tabIndex={0}
+            role="button"
+            className="cursor-pointer hover:scale-105 transition-transform duration-200"
+          >
             <span className="text-2xl font-extrabold text-info tracking-wide">
               Multi <span className="text-neutral">{text}</span>
               <Cursor cursorStyle="|" />
@@ -110,25 +120,32 @@ export default function Navbar() {
           </div>
           <ul
             tabIndex={0}
-            className="dropdown-content bg-base-200 rounded-box z-[1] w-54 p-2 shadow-2xl menu menu-sm menu-horizontal max-h-72 overflow-x-auto no-scrollbar"
+            className="dropdown-content bg-base-200/95 backdrop-blur-md rounded-box z-[1] w-64 p-4 shadow-2xl menu menu-sm max-h-96 overflow-y-auto no-scrollbar border border-base-content/10 theme-dropdown modal-animate"
           >
-            {themes.map((theme) => (
-              <li key={theme}>
-                <input
-                  type="radio"
-                  name="theme-dropdown"
-                  className="theme-controller btn btn-sm btn-block btn-ghost justify-start"
-                  aria-label={theme.charAt(0).toUpperCase() + theme.slice(1)}
-                  value={theme}
-                  onClick={() => handleThemeChange(theme)}
-                />
-              </li>
-            ))}
+            <li className="menu-title mb-3">
+              <span className="text-sm font-bold text-base-content flex items-center gap-2">
+                🎨 Pilih Tema
+              </span>
+            </li>
+            <div className="grid grid-cols-1 gap-1">
+              {themes.map((theme) => (
+                <li key={theme}>
+                  <input
+                    type="radio"
+                    name="theme-dropdown"
+                    className="theme-controller btn btn-sm btn-block btn-ghost justify-start hover:bg-base-300/50 transition-all duration-200 hover:scale-105"
+                    aria-label={theme.charAt(0).toUpperCase() + theme.slice(1)}
+                    value={theme}
+                    onClick={() => handleThemeChange(theme)}
+                  />
+                </li>
+              ))}
+            </div>
           </ul>
         </div>
       </div>
       <div className="flex-none">
-        <span className="badge badge-accent badge-md font-semibold">
+        <span className="badge badge-accent badge-md font-semibold hover:scale-105 transition-transform duration-200">
           <a href="https://github.com/mubaihaqi">@mubaihaqi</a>
         </span>
       </div>
